@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { UNIT_DIVISI_OPTIONS, type UnitDivisi } from "@/lib/supabase/types";
 
 export async function createEntry(formData: FormData) {
   const supabase = await createClient();
@@ -12,14 +11,12 @@ export async function createEntry(formData: FormData) {
   if (!user) throw new Error("Unauthorized");
 
   const unit_divisi = formData.get("unit_divisi") as string;
-  if (!UNIT_DIVISI_OPTIONS.includes(unit_divisi as UnitDivisi)) {
-    throw new Error("Invalid unit_divisi value");
-  }
+  if (!unit_divisi?.trim()) throw new Error("Unit/Divisi tidak boleh kosong");
 
   const { error } = await supabase.from("logbook_kegiatan").insert({
     user_id: user.id,
     tanggal: formData.get("tanggal") as string,
-    unit_divisi: unit_divisi as UnitDivisi,
+    unit_divisi: unit_divisi.trim(),
     deskripsi: formData.get("deskripsi") as string,
     kendala_solusi: (formData.get("kendala_solusi") as string) || null,
     tools: formData.get("tools") as string,
@@ -38,21 +35,19 @@ export async function updateEntry(formData: FormData) {
 
   const id = formData.get("id") as string;
   const unit_divisi = formData.get("unit_divisi") as string;
-  if (!UNIT_DIVISI_OPTIONS.includes(unit_divisi as UnitDivisi)) {
-    throw new Error("Invalid unit_divisi value");
-  }
+  if (!unit_divisi?.trim()) throw new Error("Unit/Divisi tidak boleh kosong");
 
   const { error } = await supabase
     .from("logbook_kegiatan")
     .update({
       tanggal: formData.get("tanggal") as string,
-      unit_divisi: unit_divisi as UnitDivisi,
+      unit_divisi: unit_divisi.trim(),
       deskripsi: formData.get("deskripsi") as string,
       kendala_solusi: (formData.get("kendala_solusi") as string) || null,
       tools: formData.get("tools") as string,
     })
     .eq("id", id)
-    .eq("user_id", user.id); // Ensure user can only update their own rows
+    .eq("user_id", user.id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/dashboard");
@@ -69,7 +64,7 @@ export async function deleteEntry(id: string) {
     .from("logbook_kegiatan")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id); // Ensure user can only delete their own rows
+    .eq("user_id", user.id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/dashboard");

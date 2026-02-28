@@ -10,20 +10,18 @@ import { deleteEntry } from "@/app/(dashboard)/dashboard/actions";
 import { LogbookFormDialog } from "./logbook-form";
 
 const BADGE_COLORS: Record<string, string> = {
-  "NOC / Lapangan": "bg-blue-500/20 text-blue-300 border border-blue-500/30",
-  Maintenance: "bg-amber-500/20 text-amber-300 border border-amber-500/30",
-  Support: "bg-green-500/20 text-green-300 border border-green-500/30",
-  "System/Dev": "bg-purple-500/20 text-purple-300 border border-purple-500/30",
-  "Admin/Teknis": "bg-rose-500/20 text-rose-300 border border-rose-500/30",
+  "NOC / Lapangan": "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30",
+  Maintenance: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30",
+  Support: "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 border border-green-200 dark:border-green-500/30",
+  "System/Dev": "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30",
+  "Admin/Teknis": "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30",
 };
 
 function UnitBadge({ unit }: { unit: string }) {
   return (
-    <span
-      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-        BADGE_COLORS[unit] ?? "bg-slate-700 text-slate-300"
-      }`}
-    >
+    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+      BADGE_COLORS[unit] ?? "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+    }`}>
       {unit}
     </span>
   );
@@ -31,7 +29,6 @@ function UnitBadge({ unit }: { unit: string }) {
 
 function DeleteButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
-
   function handleDelete() {
     if (!confirm("Yakin ingin menghapus entri ini?")) return;
     startTransition(async () => {
@@ -43,19 +40,11 @@ function DeleteButton({ id }: { id: string }) {
       }
     });
   }
-
   return (
-    <button
-      onClick={handleDelete}
-      disabled={isPending}
-      className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-      title="Hapus"
-    >
-      {isPending ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : (
-        <Trash2 className="w-4 h-4" />
-      )}
+    <button onClick={handleDelete} disabled={isPending}
+      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+      title="Hapus">
+      {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
     </button>
   );
 }
@@ -82,36 +71,32 @@ export function LogbookTable({ entries }: { entries: LogbookEntry[] }) {
 
   return (
     <div className="space-y-4">
-      {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
-          type="text"
-          placeholder="Cari kegiatan..."
-          value={search}
+          type="text" placeholder="Cari kegiatan..." value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="w-full pl-9 pr-4 py-2 text-sm rounded-lg bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          className="w-full pl-9 pr-4 py-2 text-sm rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm"
         />
       </div>
 
-      {/* Table wrapper */}
-      <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-slate-800/80 border-b border-slate-700/50">
-                <th className="text-left px-4 py-3 text-slate-400 font-semibold whitespace-nowrap">Tanggal</th>
-                <th className="text-left px-4 py-3 text-slate-400 font-semibold whitespace-nowrap">Unit / Divisi</th>
-                <th className="text-left px-4 py-3 text-slate-400 font-semibold min-w-[200px]">Deskripsi</th>
-                <th className="text-left px-4 py-3 text-slate-400 font-semibold min-w-[150px]">Kendala & Solusi</th>
-                <th className="text-left px-4 py-3 text-slate-400 font-semibold whitespace-nowrap">Tools</th>
-                <th className="text-center px-4 py-3 text-slate-400 font-semibold">Aksi</th>
+              <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/50">
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold whitespace-nowrap">Tanggal</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold whitespace-nowrap">Unit / Divisi</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold min-w-[200px]">Deskripsi</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold min-w-[150px]">Kendala &amp; Solusi</th>
+                <th className="text-left px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold whitespace-nowrap">Tools</th>
+                <th className="text-center px-4 py-3 text-slate-500 dark:text-slate-400 font-semibold">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/30">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-slate-500">
+                  <td colSpan={6} className="text-center py-16 text-slate-400">
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-4xl">📋</span>
                       <span>{search ? "Tidak ada hasil yang cocok" : "Belum ada kegiatan yang dicatat"}</span>
@@ -120,42 +105,29 @@ export function LogbookTable({ entries }: { entries: LogbookEntry[] }) {
                 </tr>
               ) : (
                 paged.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className="bg-slate-800/20 hover:bg-slate-800/50 transition-colors group"
-                  >
-                    <td className="px-4 py-3 text-slate-300 whitespace-nowrap font-medium">
+                  <tr key={entry.id} className="bg-white dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap font-medium">
                       {format(new Date(entry.tanggal + "T00:00:00"), "dd MMM yyyy", { locale: localeId })}
                     </td>
-                    <td className="px-4 py-3">
-                      <UnitBadge unit={entry.unit_divisi} />
-                    </td>
-                    <td className="px-4 py-3 text-slate-300 max-w-[250px]">
+                    <td className="px-4 py-3"><UnitBadge unit={entry.unit_divisi} /></td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 max-w-[250px]">
                       <p className="line-clamp-2">{entry.deskripsi}</p>
                     </td>
-                    <td className="px-4 py-3 text-slate-400 max-w-[200px]">
-                      {entry.kendala_solusi ? (
-                        <p className="line-clamp-2">{entry.kendala_solusi}</p>
-                      ) : (
-                        <span className="text-slate-600 italic">—</span>
-                      )}
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 max-w-[200px]">
+                      {entry.kendala_solusi
+                        ? <p className="line-clamp-2">{entry.kendala_solusi}</p>
+                        : <span className="text-slate-300 dark:text-slate-600 italic">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-slate-400 whitespace-nowrap max-w-[150px]">
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap max-w-[150px]">
                       <p className="truncate">{entry.tools}</p>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
-                        <LogbookFormDialog
-                          entry={entry}
-                          trigger={
-                            <button
-                              className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                          }
-                        />
+                        <LogbookFormDialog entry={entry} trigger={
+                          <button className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="Edit">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        } />
                         <DeleteButton id={entry.id} />
                       </div>
                     </td>
@@ -167,28 +139,17 @@ export function LogbookTable({ entries }: { entries: LogbookEntry[] }) {
         </div>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
-          <span>
-            Menampilkan {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} dari {filtered.length} entri
-          </span>
+        <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+          <span>Menampilkan {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} dari {filtered.length} entri</span>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 disabled:opacity-40 transition-colors"
-            >
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 transition-colors">
               ← Sebelum
             </button>
-            <span className="px-3 py-1.5 text-slate-300">
-              {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 disabled:opacity-40 transition-colors"
-            >
+            <span className="px-3 py-1.5 text-slate-700 dark:text-slate-300">{currentPage} / {totalPages}</span>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 transition-colors">
               Berikut →
             </button>
           </div>
