@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📋 Logbook Magang
 
-## Getting Started
+Aplikasi web untuk mencatat kegiatan harian magang secara digital. Mendukung multiple user, CRUD penuh, dan export laporan ke CSV/PDF.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)
+![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v4-38BDF8?logo=tailwindcss)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
+
+---
+
+## ✨ Fitur
+
+- 🔐 **Autentikasi** — Login & Daftar via email/password (Supabase Auth)
+- 👥 **Multi-user** — Data setiap user terisolasi sempurna via Row Level Security
+- 📊 **Dashboard** — Tabel data dengan search & pagination
+- ✏️ **CRUD** — Tambah, edit, dan hapus entri kegiatan
+- 📤 **Export** — Download laporan ke **CSV** (Excel-friendly) atau **PDF** (A4 Landscape)
+- ☁️ **Serverless** — Siap deploy ke Vercel tanpa backend tambahan
+
+---
+
+## 🗂️ Kolom Logbook
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| Tanggal | Date | Tanggal kegiatan |
+| Unit / Divisi | Dropdown | NOC / Lapangan, Maintenance, Support, System/Dev, Admin/Teknis |
+| Deskripsi | Text | Detail teknis kegiatan |
+| Kendala & Solusi | Text | Opsional |
+| Tools | Text | Software/hardware yang digunakan |
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend & Backend** — [Next.js 16](https://nextjs.org/) (App Router + Server Actions)
+- **Styling** — [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+- **Database & Auth** — [Supabase](https://supabase.com/) (PostgreSQL + Row Level Security)
+- **Hosting** — [Vercel](https://vercel.com/)
+
+---
+
+## 🚀 Cara Menjalankan
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/username/logbook-magang.git
+cd logbook-magang
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Setup Supabase
+
+1. Buat project baru di [supabase.com](https://supabase.com)
+2. Jalankan file `supabase_setup.sql` di **SQL Editor** Supabase
+3. Salin **Project URL** dan **anon key** dari **Settings → API**
+
+### 4. Buat file `.env.local`
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciO...
+```
+
+### 5. Jalankan dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ☁️ Deploy ke Vercel
 
-## Learn More
+1. Push project ini ke GitHub
+2. Import repo di [vercel.com/new](https://vercel.com/new)
+3. Tambahkan environment variable:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Klik **Deploy** ✅
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Struktur Project
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── (auth)/login/          # Halaman Login
+│   ├── (auth)/signup/         # Halaman Daftar
+│   └── (dashboard)/dashboard/ # Dashboard + CRUD
+├── components/
+│   ├── logbook-form.tsx        # Form dialog (Create/Edit)
+│   ├── logbook-table.tsx       # Tabel data + search
+│   └── export-buttons.tsx      # Export CSV & PDF
+└── lib/supabase/
+    ├── client.ts               # Supabase browser client
+    ├── server.ts               # Supabase server client
+    └── types.ts                # TypeScript types
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 Lisensi
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License — bebas digunakan untuk keperluan pribadi maupun akademik.
