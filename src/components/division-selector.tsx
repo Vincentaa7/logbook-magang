@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, ChevronDown, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_DIVISIONS, type Division } from "@/lib/supabase/types";
-import { createDivision, deleteDivision } from "@/app/(dashboard)/dashboard/division-actions";
+import { createDivision, deleteDivision, hideDefaultDivision } from "@/app/(dashboard)/dashboard/division-actions";
 
 interface DivisionSelectorProps {
   defaultValue?: string;
@@ -13,6 +13,7 @@ interface DivisionSelectorProps {
 
 export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
   const [divisions, setDivisions] = useState<Division[]>([]);
+  const [hiddenDefaults, setHiddenDefaults] = useState<string[]>([]);
   const [selected, setSelected] = useState(defaultValue ?? "");
   const [open, setOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -22,19 +23,42 @@ export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase
-      .from("user_divisions")
-      .select("*")
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        setDivisions(data ?? []);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("user_divisions")
+        .select("*")
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("user_hidden_defaults")
+        .select("name"),
+    ]).then(([{ data: divData }, { data: hiddenData }]) => {
+      setDivisions(divData ?? []);
+      setHiddenDefaults((hiddenData ?? []).map((h) => h.name));
+      setLoading(false);
+    });
   }, []);
 
-  const allOptions = divisions.length > 0
-    ? divisions.map((d) => d.name)
-    : DEFAULT_DIVISIONS;
+  // Visible default divisions = DEFAULT_DIVISIONS dikurangi yang tersembunyi
+  const visibleDefaults = DEFAULT_DIVISIONS.filter(
+    (name) => !hiddenDefaults.includes(name)
+  );
+
+  // Gabungkan default yang masih aktif + divisi custom user, lalu deduplikasi
+  const seen = new Set<string>();
+  const deduped: Array<{ name: string; divObj?: Division; isDefault: boolean }> = [];
+
+  for (const name of visibleDefaults) {
+    if (!seen.has(name)) {
+      seen.add(name);
+      deduped.push({ name, isDefault: true });
+    }
+  }
+  for (const d of divisions) {
+    if (!seen.has(d.name)) {
+      seen.add(d.name);
+      deduped.push({ name: d.name, divObj: d, isDefault: false });
+    }
+  }
 
   function handleSelect(name: string) {
     setSelected(name);
@@ -46,7 +70,6 @@ export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
     startTransition(async () => {
       try {
         await createDivision(newName.trim());
-        // Refresh list
         const supabase = createClient();
         const { data } = await supabase
           .from("user_divisions")
@@ -63,7 +86,7 @@ export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
     });
   }
 
-  function handleDelete(div: Division) {
+  function handleDeleteCustom(div: Division) {
     startTransition(async () => {
       try {
         await deleteDivision(div.id);
@@ -72,6 +95,19 @@ export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
         toast.success(`Divisi "${div.name}" dihapus`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Gagal menghapus divisi");
+      }
+    });
+  }
+
+  function handleHideDefault(name: string) {
+    startTransition(async () => {
+      try {
+        await hideDefaultDivision(name);
+        setHiddenDefaults((prev) => [...prev, name]);
+        if (selected === name) setSelected("");
+        toast.success(`Divisi "${name}" dihapus dari pilihan`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Gagal menghapus divisi default");
       }
     });
   }
@@ -100,42 +136,42 @@ export function DivisionSelector({ defaultValue }: DivisionSelectorProps) {
           <div className="absolute z-20 mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl overflow-hidden">
             {/* Options list */}
             <div className="max-h-48 overflow-y-auto">
-              {allOptions.length === 0 ? (
+              {deduped.length === 0 ? (
                 <div className="px-3 py-4 text-sm text-slate-400 text-center">
-                  Belum ada divisi. Tambahkan di bawah.
+                  Semua divisi tersembunyi. Tambahkan divisi baru di bawah.
                 </div>
               ) : (
-                allOptions.map((name) => {
-                  const divObj = divisions.find((d) => d.name === name);
-                  return (
-                    <div
-                      key={name}
-                      className={`flex items-center justify-between px-3 py-2 text-sm cursor-pointer group transition-colors
-                        ${selected === name
-                          ? "bg-blue-50 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                        }`}
-                    >
-                      <span className="flex-1" onClick={() => handleSelect(name)}>
-                        {name}
-                        {!divObj && (
-                          <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">(default)</span>
-                        )}
-                      </span>
-                      {divObj && (
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(divObj)}
-                          disabled={isPending}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition"
-                          title="Hapus divisi"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                deduped.map(({ name, divObj, isDefault }) => (
+                  <div
+                    key={name}
+                    className={`flex items-center justify-between px-3 py-2 text-sm cursor-pointer group transition-colors
+                      ${selected === name
+                        ? "bg-blue-50 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                      }`}
+                  >
+                    <span className="flex-1" onClick={() => handleSelect(name)}>
+                      {name}
+                      {isDefault && (
+                        <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">(default)</span>
                       )}
-                    </div>
-                  );
-                })
+                    </span>
+                    {/* Tombol hapus untuk SEMUA divisi (default maupun custom) */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        divObj
+                          ? handleDeleteCustom(divObj)
+                          : handleHideDefault(name)
+                      }
+                      disabled={isPending}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition disabled:opacity-50"
+                      title={isDefault ? "Sembunyikan divisi default" : "Hapus divisi"}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
               )}
             </div>
 

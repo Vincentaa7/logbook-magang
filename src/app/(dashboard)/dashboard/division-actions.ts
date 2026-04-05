@@ -42,3 +42,23 @@ export async function deleteDivision(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/dashboard");
 }
+
+export async function hideDefaultDivision(name: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase.from("user_hidden_defaults").insert({
+    user_id: user.id,
+    name: name.trim(),
+  });
+
+  if (error) {
+    // Abaikan jika sudah ada (23505 = unique violation)
+    if (error.code !== "23505") throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard");
+}
